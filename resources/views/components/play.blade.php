@@ -1,0 +1,1 @@
+<x-scorm-player :scormIdentifier="$scormIdentifier" />
