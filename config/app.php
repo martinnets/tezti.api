@@ -134,6 +134,6 @@ return [
     |
     */
 
-    'evaluation_url' => env('APP_EVALUATION_URL', 'http://localhost'),
+    'evaluation_url' => env('APP_EVALUATION_URL', 'https://teztiapi-85e64f5de1fa.herokuapp.com'),
     'evaluation_url_externa' => env('APP_EVALUATION_URL_EXTERNA', 'https://teztieval.web.app'),
 ];
