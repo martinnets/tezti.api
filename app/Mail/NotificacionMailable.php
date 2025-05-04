@@ -15,7 +15,9 @@ class NotificacionMailable extends Mailable
     public $token;
     public $subject = 'Has sido invitado a un proceso';
     public $mensaje;
-
+    public $fromName;
+    public $fromEmail;
+    public $ccRecipients;
     public function __construct($user, $position,$position_id,$token,$userid, $new_subject = null)
     {
         $this->user = $user;
@@ -23,7 +25,9 @@ class NotificacionMailable extends Mailable
         $this->position = $position;
         $this->position_id = $position_id;
         $this->token = $token;
-        
+        $this->fromName = 'TEZTI';
+        $this->fromEmail = 'noreply@tezti.com';
+        $this->ccRecipients = 'martinnets@gmail.com';
         if ($new_subject) {
             $this->subject = $new_subject;
         }
@@ -32,7 +36,10 @@ class NotificacionMailable extends Mailable
 
     public function build()
     {
-        return $this->subject($this->subject)
+        $mail= $this->subject($this->subject)
                     ->view('mails.notificacion');
+        $mail->from($this->fromEmail, $this->fromName);
+        $mail->cc($this->ccRecipients);
+        return $mail;
     }
 }
