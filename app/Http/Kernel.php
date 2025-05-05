@@ -1,4 +1,4 @@
-<!-- <?php
+<?php
 
 namespace App\Http;
 
@@ -14,4 +14,4 @@ class Kernel extends HttpKernel
     //     // otros middlewares...
     //     'no-frame-header' => \App\Http\Middleware\RemoveXFrameOptions::class,
     // ];
-} -->
+}

@@ -25,8 +25,7 @@ class EvaluacionController extends Controller
         if ($position) {
             if (is_numeric($position_user)){
                 $user = User::find($position_user);
-                $token = $user->createToken('auth_token')->plainTextToken;                
-                Mail::to($user->email)->send(new NotificacionMailable($user->name, $position->name,$id,$token,$user->id, 'Has sido invitado a un proceso'));
+                $token = $user->createToken('auth_token')->plainTextToken;
                 $data[]=[
                     'user_id' => $position_user,
                     'position' => $position->name,
@@ -35,11 +34,11 @@ class EvaluacionController extends Controller
                     'email' => $user->email,
                     'token' => $token,
                 ];
+                Mail::to($user->email)->send(new NotificacionMailable($user->name, $position->name,$id,$token,$user->id, 'Has sido invitado a un proceso'));
             }else {
                 foreach ($position_user as $value) {
                     $user = User::find($value);
                     $token = $user->createToken('auth_token')->plainTextToken;
-                    Mail::to($user->email)->send(new NotificacionMailable($user->name, $position->name,$id,$token,$user->id, 'Has sido invitado a un proceso'));
                     $data[]=[
                         'user_id' => $value,
                         'position' => $position->name,
@@ -48,6 +47,7 @@ class EvaluacionController extends Controller
                         'email' => $user->email,
                         'token' => $token,
                     ];
+                    Mail::to($user->email)->send(new NotificacionMailable($user->name, $position->name,$id,$token,$user->id, 'Has sido invitado a un proceso'));
                     //Mail::to($user->email)->send(new InvitedPositionTemplate($user->name, $position->name,$id,$token, 'Recordatorio: Has sido invitado a un proceso'));
                 }
             }
