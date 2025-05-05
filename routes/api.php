@@ -26,7 +26,31 @@ Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot-password');
 Route::post('validate-password-code', [AuthController::class, 'validatePasswordCode'])->name('validate-password-code');
 Route::patch('change-password', [AuthController::class, 'changePassword'])->name('change-password');
+ // Positions endponits
+ Route::prefix('positions')->name('positions.')->group(function () {
+    Route::get('indicators/get', [PositionController::class, 'getIndicators'])->name('get-indicators');
+    Route::get('search', [PositionController::class, 'search'])->name('search');
+    Route::get('search/export', [PositionController::class, 'exportSearch'])->name('export-search')->withoutMiddleware(['auth:sanctum']);
+    Route::post('create', [PositionController::class, 'create'])->name('create');
+    Route::get('{id}/get', [PositionController::class, 'get'])->name('get');
+    Route::put('{id}/update', [PositionController::class, 'update'])->name('update');
+    Route::delete('{id}/delete', [PositionController::class, 'delete'])->name('delete');
+    Route::post('{id}/skills/set', [PositionController::class, 'setSkills'])->name('set-skills');
+    Route::get('{id}/skills/get', [PositionController::class, 'getSkills'])->name('get-skills');
+    Route::get('{id}/users/search', [PositionController::class, 'searchUsers'])->name('search-users');
+    Route::post('{id}/users/set-add', [PositionController::class, 'setAddUser'])->name('set-add-user');
+    Route::post('{id}/users/send-reminders', [PositionController::class, 'sendReminders'])->name('send-reminders');
+    Route::get('users/{id}/get', [PositionController::class, 'getUser'])->name('get-user');
+    Route::delete('users/{id}/remove', [PositionController::class, 'removeUser'])->name('remove-user');
+    Route::get('{id}/users/{user_id}/check', [PositionController::class, 'checkUser'])->name('check-user');
 
+    // Positions filter endponits
+    Route::prefix('filters')->name('filters.')->group(function () {
+        Route::get('creators/get', [PositionController::class, 'getCreators'])->name('get-creators');
+        Route::get('status/get', [PositionController::class, 'getStatus'])->name('get-status');
+        Route::get('types/get', [PositionController::class, 'getTypes'])->name('get-types');
+    });
+});
 // Authenticated endponits
 Route::middleware(['auth:sanctum', UserIsActive::class])->group(function () {
     // Auth endponits
@@ -93,31 +117,7 @@ Route::middleware(['auth:sanctum', UserIsActive::class])->group(function () {
             Route::get('status/list', [UserController::class, 'listStatus'])->name('list-status');
         });
 
-        // Positions endponits
-        Route::prefix('positions')->name('positions.')->group(function () {
-            Route::get('indicators/get', [PositionController::class, 'getIndicators'])->name('get-indicators');
-            Route::get('search', [PositionController::class, 'search'])->name('search');
-            Route::get('search/export', [PositionController::class, 'exportSearch'])->name('export-search')->withoutMiddleware(['auth:sanctum']);
-            Route::post('create', [PositionController::class, 'create'])->name('create');
-            Route::get('{id}/get', [PositionController::class, 'get'])->name('get');
-            Route::put('{id}/update', [PositionController::class, 'update'])->name('update');
-            Route::delete('{id}/delete', [PositionController::class, 'delete'])->name('delete');
-            Route::post('{id}/skills/set', [PositionController::class, 'setSkills'])->name('set-skills');
-            Route::get('{id}/skills/get', [PositionController::class, 'getSkills'])->name('get-skills');
-            Route::get('{id}/users/search', [PositionController::class, 'searchUsers'])->name('search-users');
-            Route::post('{id}/users/set-add', [PositionController::class, 'setAddUser'])->name('set-add-user');
-            Route::post('{id}/users/send-reminders', [PositionController::class, 'sendReminders'])->name('send-reminders');
-            Route::get('users/{id}/get', [PositionController::class, 'getUser'])->name('get-user');
-            Route::delete('users/{id}/remove', [PositionController::class, 'removeUser'])->name('remove-user');
-            Route::get('{id}/users/{user_id}/check', [PositionController::class, 'checkUser'])->name('check-user');
-
-            // Positions filter endponits
-            Route::prefix('filters')->name('filters.')->group(function () {
-                Route::get('creators/get', [PositionController::class, 'getCreators'])->name('get-creators');
-                Route::get('status/get', [PositionController::class, 'getStatus'])->name('get-status');
-                Route::get('types/get', [PositionController::class, 'getTypes'])->name('get-types');
-            });
-        });
+       
 
         // Evaluteds endponits
         Route::prefix('evaluateds')->name('evaluateds.')->group(function () {
