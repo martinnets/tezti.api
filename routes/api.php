@@ -28,6 +28,7 @@ Route::post('validate-password-code', [AuthController::class, 'validatePasswordC
 Route::patch('change-password', [AuthController::class, 'changePassword'])->name('change-password');
  // Positions endponits
  Route::prefix('positions')->name('positions.')->group(function () {
+    Route::get('sellst', [PositionController::class, 'index'])->name('index');
     Route::get('indicators/get', [PositionController::class, 'getIndicators'])->name('get-indicators');
     Route::get('search', [PositionController::class, 'search'])->name('search');
     Route::get('search/export', [PositionController::class, 'exportSearch'])->name('export-search')->withoutMiddleware(['auth:sanctum']);

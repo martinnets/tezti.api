@@ -36,10 +36,17 @@ use Laravel\Sanctum\PersonalAccessToken;
 use Maatwebsite\Excel\Facades\Excel;
 use Ramsey\Uuid\Type\Integer;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-
+ 
 class PositionController extends Controller
 {
-   
+    public function index(Request $request)
+    {
+        $data = DB::table('positions')->get();
+        return response()->json([
+            'data' => $data,
+            'message' => 'Listado de puestos obtenido exitosamente.'
+        ], Response::HTTP_OK);
+    }
     /**
      * Get position filter - list of creators
      * @OA\Get (
@@ -426,67 +433,67 @@ class PositionController extends Controller
      * @param SearchRequest $request
      * @return JsonResponse
      */
-    public function search(SearchRequest $request): JsonResponse
+    public function search(Request $request): JsonResponse
     {
-        $request->validated();
+        //$request->validated();
+       // return $request
+        // $where = function ($query) use ($request) {
+        //     if ($request->has('organization_id')) {
+        //         $query->where('organization_id', $request->input('organization_id'));
+        //     }
+        //     if ($request->has('user_id')) {
+        //         $query->where('user_id', $request->input('user_id'));
+        //     }
+        //     if (auth('sanctum')->user()->role == 'C') {
+        //         $query->where('user_id', auth('sanctum')->user()->id);
+        //     }
+        //     if ($request->has('text')) {
+        //         $query->whereRaw("unaccent(name) ILIKE unaccent(?)", ['%' . $request->input('text') . '%']);
 
-        $where = function ($query) use ($request) {
-            if ($request->has('organization_id')) {
-                $query->where('organization_id', $request->input('organization_id'));
-            }
-            if ($request->has('user_id')) {
-                $query->where('user_id', $request->input('user_id'));
-            }
-            if (auth('sanctum')->user()->role == 'C') {
-                $query->where('user_id', auth('sanctum')->user()->id);
-            }
-            if ($request->has('text')) {
-                $query->whereRaw("unaccent(name) ILIKE unaccent(?)", ['%' . $request->input('text') . '%']);
+        //     }
+        //     if ($request->has('from') && $request->has('from')) {
+        //         $from = Carbon::parse($request->input('from'))->format('Y-m-d');
+        //         $to = Carbon::parse($request->input('to'))->format('Y-m-d');
 
-            }
-            if ($request->has('from') && $request->has('from')) {
-                $from = Carbon::parse($request->input('from'))->format('Y-m-d');
-                $to = Carbon::parse($request->input('to'))->format('Y-m-d');
+        //         $query->whereBetween('from', [$from, $to]);
+        //         $query->orwhereBetween('to', [$from, $to]);
+        //     } else {
+        //         if ($request->has('from')) {
+        //             $from = Carbon::parse($request->input('from'))->format('Y-m-d');
+        //             $query->where(function ($subquery) use ($from) {
+        //                 $subquery->where('from', '>=', $from);
+        //                 $subquery->orWhere('to', '>=', $from);
+        //                 return $subquery;
+        //             });
+        //         }
+        //         if ($request->has('to')) {
+        //             $to = Carbon::parse($request->input('to'))->addDay()->format('Y-m-d');
+        //             $query->where(function ($subquery) use ($to) {
+        //                 $subquery->where('from', '<', $to);
+        //                 $subquery->orWhere('to', '<', $to);
+        //                 return $subquery;
+        //             });
+        //         }
+        //     }
+        //     if ($request->has('hierarchical_level_id')) {
+        //         $query->where('hierarchical_level_id', $request->input('hierarchical_level_id'));
+        //     }
+        //     $query->where('status', '<>', -1);
+        //     if ($request->has('status')) {
+        //         $query->where('status', $request->input('status'));
+        //     }
+        //     return $query;
+        // };
 
-                $query->whereBetween('from', [$from, $to]);
-                $query->orwhereBetween('to', [$from, $to]);
-            } else {
-                if ($request->has('from')) {
-                    $from = Carbon::parse($request->input('from'))->format('Y-m-d');
-                    $query->where(function ($subquery) use ($from) {
-                        $subquery->where('from', '>=', $from);
-                        $subquery->orWhere('to', '>=', $from);
-                        return $subquery;
-                    });
-                }
-                if ($request->has('to')) {
-                    $to = Carbon::parse($request->input('to'))->addDay()->format('Y-m-d');
-                    $query->where(function ($subquery) use ($to) {
-                        $subquery->where('from', '<', $to);
-                        $subquery->orWhere('to', '<', $to);
-                        return $subquery;
-                    });
-                }
-            }
-            if ($request->has('hierarchical_level_id')) {
-                $query->where('hierarchical_level_id', $request->input('hierarchical_level_id'));
-            }
-            $query->where('status', '<>', -1);
-            if ($request->has('status')) {
-                $query->where('status', $request->input('status'));
-            }
-            return $query;
-        };
-
-        // Consulta con paginación y ordenamiento
-        $positions = Position::with(['organization', 'hierarchicalLevel', 'creator'])
-            ->selectRaw("*, 0 AS progress")
-            ->where($where)
-            ->orderBy($request->input('sort_by', 'id'), $request->input('order', 'asc'))
-            ->paginate($request->input('per_page', 50), null, 'page', $request->input('page', 1));
+        // // Consulta con paginación y ordenamiento
+        // $positions = Position::with(['organization', 'hierarchicalLevel', 'creator'])
+        //     ->selectRaw("*, 0 AS progress")
+        //     ->where($where)
+        //     ->orderBy($request->input('sort_by', 'id'), $request->input('order', 'asc'))
+        //     ->paginate($request->input('per_page', 50), null, 'page', $request->input('page', 1));
 
         return response()->json([
-            'data' => $positions,
+            'data' => $request,
             'message' => 'Búsqueda de puestos realizada exitosamente.'
         ], Response::HTTP_OK);
     }
