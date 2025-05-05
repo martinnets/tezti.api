@@ -18,10 +18,7 @@ class Kernel extends HttpKernel
         'web' => [
             // Middleware web existentes...
         ],
-
         'api' => [
-            \App\Http\Middleware\ForceJsonResponse::class, // Añadir esta línea
-            'throttle:api',
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
