@@ -6,6 +6,7 @@ use App\Models\HierarchicalLevel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class HierarchicalLevelController extends Controller
 {
@@ -56,8 +57,9 @@ class HierarchicalLevelController extends Controller
      */
     public function getList(): JsonResponse
     {
+        $data = DB::table('hierarchical_levels')->get();
         return response()->json([
-            'data' => HierarchicalLevel::orderBy('level')->get(),
+            'data' => $data,//HierarchicalLevel::orderBy('level')->get(),
             'message' => 'Listado de niveles jerárquicos obtenido exitosamente.'
         ], Response::HTTP_OK);
     }

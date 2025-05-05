@@ -41,18 +41,80 @@ class PositionController extends Controller
 {
     public function index(Request $request)
     {
-        $data = DB::table('positions')->get();
+        //$data = DB::table('positions')->get();
+        $positions = DB::table('positions')        
+        ->join('organizations', 'organizations.id', '=', 'positions.organization_id')
+        ->join('users', 'users.id', '=', 'positions.user_id')
+        ->join('hierarchical_levels', 'hierarchical_levels.id', '=', 'positions.hierarchical_level_id')
+        ->select('positions.*', 'organizations.name as organization_name',
+        'users.name as user_name', 'hierarchical_levels.name as hierarchical_level_name',
+        DB::raw('case when positions.status = 1 then \'Activo\' when positions.status = 2 then \'Cerrado\' else \'Inactivo\' end as status_label'))
+        //->where('positions.id', $positionid)
+        ->get()->toArray();  
+    //     $result = [];
+        foreach($positions as $position){
+            $result[] = [
+                "id" => $position->id,
+                 "hierarchical_level_id" => $position->hierarchical_level_id,
+                 "name" => $position->name,
+                 "from"=> $position->from,
+                 "to"=> $position->to,
+                 "status"=> $position->status,
+                 "user_id"=> $position->user_id,
+                 "organization_id"=> $position->organization_id,
+                 "type"=> $position->type,
+                 "progress"=> 0,
+                 "type_label"=> $position->type,
+                "status_label"=> $position->status_label,
+                "organization"=> [
+                    "id"=> $position->organization_id,
+                    "name"=>  $position->organization_name,
+                ],
+                "hierarchical_level"=> [
+                    "id"=> $position->hierarchical_level_id,
+                    "name"=> $position->hierarchical_level_name,
+                    "level"=> 1
+                ],
+                "creator"=> [
+                    "id"=> $position->user_id,
+                    "name"=> $position->user_name,
+                    "is_active_label"=> "Activo",
+                    "document_type_label"=> null,
+                    "role_label"=> null
+                ]
+            ];
+        }
+        $data[]=[
+            "current_page"=> 1,
+            "data"=> [$result],
+            "first_page_url"=> "http://localhost:8000/api/positions/search?page=1",
+            "from"=> 1,
+            "last_page"=> 1,
+            "last_page_url"=> "http://localhost:8000/api/positions/search?page=1",
+            "links"=>  ["url" => null, "label" => "&laquo; Previous", "active" => false],
+            "next_page_url"=> null,
+            "path"=> "http://localhost:8000/api/positions/search",
+            "per_page"=> 20,
+            "prev_page_url"=> null,
+            "to"=> 15,
+            "total"=> 15
+        ];
         return response()->json([
-            'data' => $data,
+            'data' =>  $data,
             'message' => 'Listado de puestos obtenido exitosamente.'
         ], Response::HTTP_OK);
+        
+        // return response()->json([
+        //     'data' =>  $data,
+        //     'message' => 'Listado de puestos obtenido exitosamente.'
+        // ], Response::HTTP_OK);
     }
     /**
      * Get position filter - list of creators
      * @OA\Get (
      *     path="/api/positions/filters/creators/get",
      *     tags={"Positions"},
-     *     security={{"bearerAuth":{}}},
+     *     security={{"bearerAuth"=>{}}},
      *     summary="Filtros - Obtener lista de creadores",
      *     description="Filtros - Obtener listado de usuarios creadores de puestos.",
      *      @OA\Response(
@@ -152,6 +214,7 @@ class PositionController extends Controller
      */
     public function getStatus(): JsonResponse
     {
+        
         return response()->json([
             'data' => PositionStatus::COLLECTION,
             'message' => 'Listado de estados de puesto obtenido exitosamente.'
@@ -436,64 +499,120 @@ class PositionController extends Controller
     public function search(Request $request): JsonResponse
     {
         ////$request->validated();
-       // return $request
-        $where = function ($query) use ($request) {
-            if ($request->has('organization_id')) {
-                $query->where('organization_id', $request->input('organization_id'));
-            }
-            if ($request->has('user_id')) {
-                $query->where('user_id', $request->input('user_id'));
-            }
-            if (auth('sanctum')->user()->role == 'C') {
-                $query->where('user_id', auth('sanctum')->user()->id);
-            }
-            if ($request->has('text')) {
-                $query->whereRaw("unaccent(name) ILIKE unaccent(?)", ['%' . $request->input('text') . '%']);
+        // return $request
+        // $where = function ($query) use ($request) {
+        //     if ($request->has('organization_id')) {
+        //         $query->where('organization_id', $request->input('organization_id'));
+        //     }
+        //     if ($request->has('user_id')) {
+        //         $query->where('user_id', $request->input('user_id'));
+        //     }
+        //     if (auth('sanctum')->user()->role == 'C') {
+        //         $query->where('user_id', auth('sanctum')->user()->id);
+        //     }
+        //     if ($request->has('text')) {
+        //         $query->whereRaw("unaccent(name) ILIKE unaccent(?)", ['%' . $request->input('text') . '%']);
 
-            }
-            if ($request->has('from') && $request->has('from')) {
-                $from = Carbon::parse($request->input('from'))->format('Y-m-d');
-                $to = Carbon::parse($request->input('to'))->format('Y-m-d');
+        //     }
+        //     if ($request->has('from') && $request->has('from')) {
+        //         $from = Carbon::parse($request->input('from'))->format('Y-m-d');
+        //         $to = Carbon::parse($request->input('to'))->format('Y-m-d');
 
-                $query->whereBetween('from', [$from, $to]);
-                $query->orwhereBetween('to', [$from, $to]);
-            } else {
-                if ($request->has('from')) {
-                    $from = Carbon::parse($request->input('from'))->format('Y-m-d');
-                    $query->where(function ($subquery) use ($from) {
-                        $subquery->where('from', '>=', $from);
-                        $subquery->orWhere('to', '>=', $from);
-                        return $subquery;
-                    });
-                }
-                if ($request->has('to')) {
-                    $to = Carbon::parse($request->input('to'))->addDay()->format('Y-m-d');
-                    $query->where(function ($subquery) use ($to) {
-                        $subquery->where('from', '<', $to);
-                        $subquery->orWhere('to', '<', $to);
-                        return $subquery;
-                    });
-                }
-            }
-            if ($request->has('hierarchical_level_id')) {
-                $query->where('hierarchical_level_id', $request->input('hierarchical_level_id'));
-            }
-            $query->where('status', '<>', -1);
-            if ($request->has('status')) {
-                $query->where('status', $request->input('status'));
-            }
-            return $query;
-        };
+        //         $query->whereBetween('from', [$from, $to]);
+        //         $query->orwhereBetween('to', [$from, $to]);
+        //     } else {
+        //         if ($request->has('from')) {
+        //             $from = Carbon::parse($request->input('from'))->format('Y-m-d');
+        //             $query->where(function ($subquery) use ($from) {
+        //                 $subquery->where('from', '>=', $from);
+        //                 $subquery->orWhere('to', '>=', $from);
+        //                 return $subquery;
+        //             });
+        //         }
+        //         if ($request->has('to')) {
+        //             $to = Carbon::parse($request->input('to'))->addDay()->format('Y-m-d');
+        //             $query->where(function ($subquery) use ($to) {
+        //                 $subquery->where('from', '<', $to);
+        //                 $subquery->orWhere('to', '<', $to);
+        //                 return $subquery;
+        //             });
+        //         }
+        //     }
+        //     if ($request->has('hierarchical_level_id')) {
+        //         $query->where('hierarchical_level_id', $request->input('hierarchical_level_id'));
+        //     }
+        //     $query->where('status', '<>', -1);
+        //     if ($request->has('status')) {
+        //         $query->where('status', $request->input('status'));
+        //     }
+        //     return $query;
+        // };
 
-        // Consulta con paginación y ordenamiento
-        $positions = Position::with(['organization', 'hierarchicalLevel', 'creator'])
-            ->selectRaw("*, 0 AS progress")
-            ->where($where)
-            ->orderBy($request->input('sort_by', 'id'), $request->input('order', 'asc'))
-            ->paginate($request->input('per_page', 50), null, 'page', $request->input('page', 1));
-
+        // //Consulta con paginación y ordenamiento
+        // $positions = Position::with(['organization', 'hierarchicalLevel', 'creator'])
+        //     ->selectRaw("*, 0 AS progress")
+        //     ->where($where)
+        //     ->orderBy($request->input('sort_by', 'id'), $request->input('order', 'asc'))
+        //    ->paginate($request->input('per_page', 50), null, 'page', $request->input('page', 1));
+        $positions = DB::table('positions')        
+        ->join('organizations', 'organizations.id', '=', 'positions.organization_id')
+        ->join('users', 'users.id', '=', 'positions.user_id')
+        ->join('hierarchical_levels', 'hierarchical_levels.id', '=', 'positions.hierarchical_level_id')
+        ->select('positions.*', 'organizations.name as organization_name',
+        'users.name as user_name', 'hierarchical_levels.name as hierarchical_level_name',
+        DB::raw('case when positions.status = 1 then \'Activo\' when positions.status = 2 then \'Cerrado\' else \'Inactivo\' end as status_label'))
+        //->where('positions.id', $positionid)
+        ->get()->toArray();  
+    //     $result = [];
+        foreach($positions as $position){
+            $result[] = [
+                "id" => $position->id,
+                 "hierarchical_level_id" => $position->hierarchical_level_id,
+                 "name" => $position->name,
+                 "from"=> $position->from,
+                 "to"=> $position->to,
+                 "status"=> $position->status,
+                 "user_id"=> $position->user_id,
+                 "organization_id"=> $position->organization_id,
+                 "type"=> $position->type,
+                 "progress"=> 0,
+                 "type_label"=> $position->type,
+                "status_label"=> $position->status_label,
+                "organization"=> [
+                    "id"=> $position->organization_id,
+                    "name"=>  $position->organization_name,
+                ],
+                "hierarchical_level"=> [
+                    "id"=> $position->hierarchical_level_id,
+                    "name"=> $position->hierarchical_level_name,
+                    "level"=> 1
+                ],
+                "creator"=> [
+                    "id"=> $position->user_id,
+                    "name"=> $position->user_name,
+                    "is_active_label"=> "Activo",
+                    "document_type_label"=> null,
+                    "role_label"=> null
+                ]
+            ];
+        }
+        $data[]=[
+            "current_page"=> 1,
+            "data"=> [$result],
+            "first_page_url"=> "http://localhost:8000/api/positions/search?page=1",
+            "from"=> 1,
+            "last_page"=> 1,
+            "last_page_url"=> "http://localhost:8000/api/positions/search?page=1",
+            "links"=>  ["url" => null, "label" => "&laquo; Previous", "active" => false],
+            "next_page_url"=> null,
+            "path"=> "http://localhost:8000/api/positions/search",
+            "per_page"=> 20,
+            "prev_page_url"=> null,
+            "to"=> 15,
+            "total"=> 15
+        ];
         return response()->json([
-            'data' => $positions,
+            'data' => $data,
             'message' => 'Búsqueda de puestos realizada exitosamente.'
         ], Response::HTTP_OK);
     }
