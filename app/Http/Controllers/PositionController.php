@@ -214,7 +214,7 @@ class PositionController extends Controller
      */
     public function getStatus(): JsonResponse
     {
-        
+
         return response()->json([
             'data' => PositionStatus::COLLECTION,
             'message' => 'Listado de estados de puesto obtenido exitosamente.'
@@ -1719,6 +1719,21 @@ class PositionController extends Controller
                         "deadline_color"=>"000334"
                     ];  
                 }
+                $result[]=[
+                    "current_page"=> 1,
+                    "data"=> [$data],
+                    "first_page_url"=> "http://localhost:8000/api/positions/search?page=1",
+                    "from"=> 1,
+                    "last_page"=> 1,
+                    "last_page_url"=> "http://localhost:8000/api/positions/search?page=1",
+                    "links"=>  ["url" => null, "label" => "&laquo; Previous", "active" => false],
+                    "next_page_url"=> null,
+                    "path"=> "http://localhost:8000/api/positions/search",
+                    "per_page"=> 20,
+                    "prev_page_url"=> null,
+                    "to"=> 15,
+                    "total"=> 15
+                ];
                 //return $data;
                 // Consulta con paginación y ordenamiento
                 //$users = DB::table('position_users');
@@ -1749,7 +1764,7 @@ class PositionController extends Controller
                 //     "deadline_color"=>"000334"
                 // ];
                 return response()->json([
-                    'data' => $data,
+                    'data' => $result,
                     'message' => 'Búsqueda de usuarios asignados a puesto realizada exitosamente.'
                 ], Response::HTTP_OK);
             } else {
