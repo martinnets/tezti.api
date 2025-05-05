@@ -14,7 +14,7 @@
         "doctrine/annotations": "^2.0",
         "jadob/bridge-doctrine-annotations": "^0.4.1",
         "laravel/framework": "^11.9",
-        "laravel/sanctum": "^4.0",
+        "laravel/sanctum": "^4.1",
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.29",
         "maatwebsite/excel": "^3.1"
