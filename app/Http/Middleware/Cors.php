@@ -14,20 +14,20 @@ class Cors
      * @param  \Closure  $next
      * @return \Illuminate\Http\Response
      */
-    public function handle(Request $request, Closure $next)
-    {
-       // $response = $next($request);
-        // Si es una solicitud OPTIONS (preflight), devolvemos una respuesta OK con los headers CORS
-        // if ($request->isMethod('OPTIONS')) {
-        //     $response = response('', 200);
-        // } else {
-        //     // Para solicitudes normales (no OPTIONS), procesamos la solicitud
-        //     $response = $next($request);
-        // }
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, DELETE');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, X-Auth-Token, Origin, Authorization');
+    // public function handle(Request $request, Closure $next)
+    // {
+    //    // $response = $next($request);
+    //     // Si es una solicitud OPTIONS (preflight), devolvemos una respuesta OK con los headers CORS
+    //     // if ($request->isMethod('OPTIONS')) {
+    //     //     $response = response('', 200);
+    //     // } else {
+    //     //     // Para solicitudes normales (no OPTIONS), procesamos la solicitud
+    //     //     $response = $next($request);
+    //     // }
+    //     $response->headers->set('Access-Control-Allow-Origin', '*');
+    //     $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, DELETE');
+    //     $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, X-Auth-Token, Origin, Authorization');
 
-        return $response;
-    }
+    //     return $response;
+    // }
 }

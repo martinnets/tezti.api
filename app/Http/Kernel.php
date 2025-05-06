@@ -14,14 +14,14 @@ class Kernel extends HttpKernel
     //     // otros middlewares...
     //     'no-frame-header' => \App\Http\Middleware\RemoveXFrameOptions::class,
     // ];
-    protected $middlewareGroups = [
-        'web' => [
-            // Middleware web existentes...
-        ],
-        'api' => [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            'throttle:api',
-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        ],
-    ];
+    // protected $middlewareGroups = [
+    //     'web' => [
+    //         // Middleware web existentes...
+    //     ],
+    //     'api' => [
+    //         \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+    //         'throttle:api',
+    //         \Illuminate\Routing\Middleware\SubstituteBindings::class,
+    //     ],
+    // ];
 }
