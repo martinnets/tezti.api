@@ -41,14 +41,14 @@ class EvaluationController extends Controller
 
         if ($token) {
             //$accessToken = PersonalAccessToken::findToken($token);
-            $accessToken =DB::table('personal_access_tokens')
-            ->where('personal_access_tokens.token', $token)
-            ->get(); 
+            //$accessToken =DB::table('personal_access_tokens')
+           // ->where('personal_access_tokens.token', $token)
+            //->get(); 
             //return $accessToken;
             // if (!$accessToken || $accessToken->expires_at && $accessToken->expires_at->isPast()) {
             //     $case = 'no-access';
             // } else {
-                $userid = $accessToken[0]->tokenable;
+                //$userid = $accessToken[0]->tokenable_id;
                 $user = User::find($userid);
                 //return $user;
                 if ($position_id) {
