@@ -48,7 +48,7 @@ class EvaluationController extends Controller
             // if (!$accessToken || $accessToken->expires_at && $accessToken->expires_at->isPast()) {
             //     $case = 'no-access';
             // } else {
-                $userid = $accessToken[0]->tokenable_id;
+                $userid = $accessToken[0]->tokenable;
                 $user = User::find($userid);
                 //return $user;
                 if ($position_id) {
