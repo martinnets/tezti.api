@@ -28,6 +28,7 @@ class EvaluationController extends Controller
     {
         // Obtener el token desde la URL
         $token = $request->get('access_token');
+        $token = $request->get('uid');
         $scorm_path = null;
         $scorm_base = null;
 
