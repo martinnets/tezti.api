@@ -8,6 +8,7 @@ use App\Models\Position;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class OrganizationController extends Controller
 {
@@ -66,21 +67,26 @@ class OrganizationController extends Controller
      *
      * @return JsonResponse
      */
-    public function getList(Request $request): JsonResponse
+    public function getList(Request $request)
     {
+        $data =DB::table('organizations')->get();
         return response()->json([
-            'data' => Organization::orderBy('name')
-                ->where(function ($query) use ($request) {
-                    if (auth('sanctum')->user()->role == 'C') {
-                        $query->where('id', auth('sanctum')->user()->organization_id);
-                    }
-                    if ($request->has('only_used') && $request->get('only_used')) {
-                        $query->whereIn('id', Position::whereNotNull('organization_id')->pluck('organization_id')->unique());
-                    }
-                })
-                ->get(),
+            'data' => $data,
             'message' => 'Listado de organizaciones obtenido exitosamente.'
-        ], Response::HTTP_OK);
+        ], 200);
+        // return response()->json([
+        //     'data' => Organization::orderBy('name')
+        //         ->where(function ($query) use ($request) {
+        //             if (auth('sanctum')->user()->role == 'C') {
+        //                 $query->where('id', auth('sanctum')->user()->organization_id);
+        //             }
+        //             if ($request->has('only_used') && $request->get('only_used')) {
+        //                 $query->whereIn('id', Position::whereNotNull('organization_id')->pluck('organization_id')->unique());
+        //             }
+        //         })
+        //         ->get(),
+        //     'message' => 'Listado de organizaciones obtenido exitosamente.'
+        // ], Response::HTTP_OK);
     }
 
     /**

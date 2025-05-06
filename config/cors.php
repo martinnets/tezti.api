@@ -8,5 +8,5 @@ return [
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
     'max_age' => 0,
-    'supports_credentials' => false, // Importante para que funcionen las cookies
+    'supports_credentials' => true, // Importante para que funcionen las cookies
 ];
