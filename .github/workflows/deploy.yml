@@ -1,0 +1,50 @@
+name: Deploy Laravel to Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, bcmath, openssl, pdo, tokenizer, xml, curl
+          tools: composer
+
+      - name: Install dependencies
+        run: |
+          composer install --optimize-autoloader --no-dev
+
+      - name: Set Laravel permissions
+        run: |
+          chmod -R 775 storage bootstrap/cache || true
+
+      - name: Cache Laravel config
+        run: |
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+      - name: Zip project
+        run: |
+          zip -r deploy.zip . -x '*.git*' 'tests/*' 'node_modules/*' '.github/*'
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: ${{ secrets.EB_APP_NAME }}
+          environment_name: ${{ secrets.EB_ENV_NAME }}
+          region: ${{ secrets.AWS_REGION }}
+          version_label: "v-${{ github.run_number }}"
+          deployment_package: deploy.zip
