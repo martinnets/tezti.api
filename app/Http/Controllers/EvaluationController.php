@@ -8,7 +8,6 @@ use App\Models\HierarchicalLevel;
 use App\Models\Position;
 use App\Models\PositionSkill;
 use App\Models\PositionUser;
-use App\Models\User;
 use App\Models\PositionUserBehavior;
 use App\Models\PositionUserSkillResult;
 use App\Models\Skill;
@@ -28,7 +27,7 @@ class EvaluationController extends Controller
     {
         // Obtener el token desde la URL
         $token = $request->get('access_token');
-        $userid = $request->get('uid');
+
         $scorm_path = null;
         $scorm_base = null;
 
@@ -41,41 +40,23 @@ class EvaluationController extends Controller
         $new_status = 0;
 
         if ($token) {
-            //$accessToken = PersonalAccessToken::findToken($token);
-            //$accessToken =DB::table('personal_access_tokens')
-           // ->where('personal_access_tokens.token', $token)
-            //->get(); 
-            //return $accessToken;
-            // if (!$accessToken || $accessToken->expires_at && $accessToken->expires_at->isPast()) {
-            //     $case = 'no-access';
-            // } else {
-                //$userid = $accessToken[0]->tokenable_id;
-                $user = User::find($userid);
-                //return $user;
+            $accessToken = PersonalAccessToken::findToken($token);
+            if (!$accessToken || $accessToken->expires_at && $accessToken->expires_at->isPast()) {
+                $case = 'no-access';
+            } else {
+                $user = $accessToken->tokenable;
+
                 if ($position_id) {
                     $position = Position::find($position_id);
-                    
                     if ($position) {
-                        $now = Carbon::now();
-                        $startDate = $position->from.'T00:00:00.000000Z';
-                        $endDate = $position->to.'T23:59:00.000000Z';
-                       // return $endDate  ;
-                       //if ($position->status == 1 && Carbon::now()->between($position->from, $position->to)) {
-                        if ($position->status == 1 && $now >= $startDate && $now <= $endDate) {                                                            
-                            //$position_user = PositionUser::where('position_id', $position_id)->where('user_id', $user)->first();
-                            $position_user =DB::table('position_users')
-                                ->where('position_users.position_id', $position_id)
-                                ->where('position_users.user_id', $user->id)
-                                ->first();
-                            //$position_user = $position_user->first();
-                            //return $position_user;
+                        if ($position->status == 1 && Carbon::now()->between($position->from, $position->to)) {
+                            $position_user = PositionUser::where('position_id', $position->id)->where('user_id', $user->id)->first();
                             if ($position_user) {
                                 $case = 'ok';
-                                //return $position_user;
                                 if ($position_user->status <> 2) {
                                     $status = $request->has('status') ? $request->get('status') : $position_user->status;
                                     $new_status = 1;
-                                    
+
                                     switch ($status) {
                                         case 1:
                                             $new_status = 1;
@@ -262,6 +243,7 @@ class EvaluationController extends Controller
                                                 }
 
                                                 foreach ($results_by_position_users as $position_user_id => $skill_results) {
+
                                                     $position_user = PositionUser::with(['position'])->where('id', $position_user_id)->first();
 
                                                     if ($position_user->result >= $classification_high->from) {
@@ -269,6 +251,7 @@ class EvaluationController extends Controller
                                                         if (!isset($position_skills_highlighted[$position_user->position_id])) {
                                                             $additional_message = "Este proceso no cuenta con habilidades destacadas, tomar en cuenta la falta de criterios para detección de brechas.";
                                                         }
+
                                                         //Si alguna de las habilidades está como "No apta"
                                                         foreach ($skill_results as $skill_id => $result) {
                                                             if ($skill_results[$skill_id] < $classification->from) {
@@ -286,6 +269,7 @@ class EvaluationController extends Controller
                                                                     $counter++;
                                                                 }
                                                             }
+
                                                             if ($counter == count($position_skills_highlighted[$position_user->position_id])) {
                                                                 $position_user->is_observed = true;
                                                                 $position_user->observed_comments = "Verificación";
@@ -319,17 +303,10 @@ class EvaluationController extends Controller
                 } else {
                     $case = 'no-position';
                 }
-            //}
+            }
         }
+
         if ($scorm_base) {
-            // 1. Obtener la ruta completa del disco public
-             
-            //$content = Storage::disk('uploads')->get('demo1.txt');
-            //print_r($content);
-            //$xml_path = storage_path('app/public' . $scorm_base . 'imsmanifest.xml');
-            // Comprobar si el archivo existe
-            // $directories = Storage::disk('public')->directories('scorms');
-            // \Log::info("Directorios disponibles: " . implode(', ', $directories));
             $xml_path =   $scorm_base .'imsmanifest.xml';
             if (Storage::disk('uploads')->exists($xml_path)) {
                 $xml_content = Storage::disk('uploads')->get($xml_path);
@@ -344,36 +321,10 @@ class EvaluationController extends Controller
                     }
                 }
             } else {
-                 // El archivo no existe
                 \Log::warning("El archivo XML no existe en el almacenamiento público: $xml_path");
-                
-                // Listar directorios disponibles para depuración
                 $directories = Storage::disk('public')->directories('scorms');
-
                 \Log::info("Directorios disponibles: " . implode(', ', $directories));
             }
-            //$xml_path = config('app.evaluation_url_externa').   $scorm_base . 'imsmanifest.xml';
-            //return $xml_path;
-            //echo '<script >console.log(' . $xml_path . '")</script>';
-            //$xml_path = $scorm_base . 'imsmanifest.xml';
-            // $xml_path =   $scorm_base .'imsmanifest.xml';
-            // if (file_get_contents($xml_path)) {
-            //     dd($xml_path);
-            //     $scorm_manifiest = simplexml_load_file($xml_path);
-            //     if ($scorm_manifiest) {
-            //         foreach ($scorm_manifiest->resources->resource as $resource) {
-            //             if (isset($resource['href'])) {
-            //                 $scorm_path =storage_path('app/public' . $scorm_base . (string) $resource['href']);
-            //                 $scorm_path = config('app.evaluation_url') . '/storage' . $scorm_base . (string) $resource['href'];
-            //                 $scorm_path = config('app.evaluation_url_externa').   $scorm_base . (string) $resource['href'];
-            //                 return $scorm_path;
-            //                 echo '<script >console.log(' . $scorm_path . '")</script>';
-            //                 $scorm_path = $scorm_base . (string) $resource['href'];
-            //                 break;
-            //             }
-            //         }
-            //     }
-            // }
         }
 
 

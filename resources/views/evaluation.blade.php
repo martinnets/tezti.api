@@ -1111,20 +1111,20 @@
                                                     document.getElementById('result').value = window.scorm_result;
                                                     document.getElementById('evaluationForm').submit();
                                                      // Redirección a una URL externa después de completar todos los SCORMs
-                                                    setTimeout(function() {
+                                                    // setTimeout(function() {
                                                         
-                                                        var token = "{{ $token }}";
-                                                        var userId = "{{ $user->id }}"; // ID del usuario
-                                                        var positionId = "{{ $position->id }}"; // ID del proceso 
+                                                    //     var token = "{{ $token }}";
+                                                    //     var userId = "{{ $user->id }}"; // ID del usuario
+                                                    //     var positionId = "{{ $position->id }}"; // ID del proceso 
                                                         
-                                                        // Construir la URL con parámetros
-                                                        var redirectUrl = "https://teztieval.web.app" + 
-                                                                        "?access_token="+ encodeURIComponent(positionId) + 
-                                                                        "&uid=" + encodeURIComponent(userId) + 
-                                                                        "&position_id=" + encodeURIComponent(positionId) ;                                                        
-                                                        // Redirigir a la URL de Evaluacion (Cognifit+)
-                                                        window.location.href = redirectUrl;
-                                                    }, 1000);
+                                                    //     // Construir la URL con parámetros
+                                                    //     var redirectUrl = "https://teztieval.web.app" + 
+                                                    //                     "?access_token="+ encodeURIComponent(positionId) + 
+                                                    //                     "&uid=" + encodeURIComponent(userId) + 
+                                                    //                     "&position_id=" + encodeURIComponent(positionId) ;                                                        
+                                                    //     // Redirigir a la URL de Evaluacion (Cognifit+)
+                                                    //     window.location.href = redirectUrl;
+                                                    // }, 1000);
                                                     return "true";
                                                 },
                                                 LMSGetValue: function(name) {
