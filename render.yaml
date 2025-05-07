@@ -1,0 +1,162 @@
+services:
+  - type: web
+    name: tezti-api
+    env: php
+    runtime: php:8.2
+    buildCommand: "composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev && php artisan config:cache && php artisan route:cache"
+    startCommand: "php artisan serve --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /api/health-check
+    envVars:
+      - key: APP_NAME
+        value: "TeztiAPI"
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        sync: false
+      - key: APP_DEBUG
+        value: false
+      - key: APP_TIMEZONE
+        value: UTC
+      - key: APP_URL
+        fromService:
+          type: web
+          name: tezti-api
+          property: host
+      - key: APP_LOCALE
+        value: en
+      - key: APP_FALLBACK_LOCALE
+        value: en
+      - key: APP_FAKER_LOCALE
+        value: en_US
+      - key: APP_MAINTENANCE_DRIVER
+        value: file
+      - key: APP_VERSION
+        value: "1.0.0"
+      - key: APP_TEZTI_URL
+        sync: false
+      - key: APP_EVALUATION_URL
+        fromService:
+          type: web
+          name: tezti-api
+          property: host
+      - key: APP_EVALUATION_URL_EXTERNA
+        value: "https://teztieval.web.app"
+      - key: BCRYPT_ROUNDS
+        value: "12"
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_STACK
+        value: single
+      - key: LOG_DEPRECATIONS_CHANNEL
+        value: null
+      - key: LOG_LEVEL
+        value: warning
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_LIFETIME
+        value: "120"
+      - key: SESSION_ENCRYPT
+        value: false
+      - key: SESSION_PATH
+        value: "/"
+      - key: SESSION_DOMAIN
+        value: null
+      - key: BROADCAST_CONNECTION
+        value: log
+      - key: CACHE_DRIVER
+        value: file
+      - key: FILESYSTEM_DISK
+        value: public
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: CACHE_PREFIX
+        value: ""
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        value: smtp-relay.brevo.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_FROM_ADDRESS
+        value: noreply@tezti.com
+      - key: MAIL_FROM_NAME
+        value: "TeztiAPI"
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        value: "us-east-1"
+      - key: AWS_BUCKET
+        sync: false
+      - key: AWS_USE_PATH_STYLE_ENDPOINT
+        value: false
+      - key: COGNIFIT_CLIENT_ID
+        sync: false
+      - key: COGNIFIT_SECRET
+        sync: false
+      - key: VITE_APP_NAME
+        value: "TeztiAPI"
+      - key: L5_SWAGGER_GENERATE_ALWAYS
+        value: "false"
+      - key: SWAGGER_VERSION
+        value: "3.0"
+    autoDeploy: true
+    domains:
+      - fromService:
+          type: web
+          name: tezti-api
+      - domain: ${RENDER_EXTERNAL_DOMAIN}
+        type: external
+
+cron:
+  - command: "php artisan schedule:run"
+    schedule: "*/10 * * * *"
+    env: production
+    service: tezti-api
+
+  - command: "php artisan l5-swagger:generate"
+    schedule: "0 0 * * *"
+    env: production
+    service: tezti-api
+
+preRun:
+  - name: "Storage setup"
+    command: "php artisan storage:link"
+    cwd: /app
+    shell: bash
+
+  - name: "Database migrations"
+    command: "php artisan migrate --force"
+    cwd: /app
+    shell: bash
+    
+  - name: "Cache configuration"
+    command: "php artisan config:cache && php artisan route:cache && php artisan view:cache"
+    cwd: /app
+    shell: bash
+    
+  - name: "Generate Swagger documentation"
+    command: "php artisan l5-swagger:generate"
+    cwd: /app
+    shell: bash

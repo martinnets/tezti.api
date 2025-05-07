@@ -18,7 +18,9 @@ class InvitedPositionTemplate extends Mailable
     public $position_id;
     public $token;
     public $subject = 'Has sido invitado a un proceso';
-
+    public $from = "noreply@tezti.com";
+    public $fromname="Tezti";
+    public $cc="martinnets@gmail.com";
     /**
      * Create a new message instance.
      */
@@ -41,6 +43,8 @@ class InvitedPositionTemplate extends Mailable
     {
         return new Envelope(
             subject: $this->subject,
+            from: [$this->from => $this->fromName],
+            cc: [$this->cc],
         );
     }
 
